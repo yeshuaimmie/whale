@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="InvestPro">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <title>InvestPro - Smart Investment Platform Uganda</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body style="padding-top: 60px;">
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">The Whale Investors</a>
+            <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#plans">Plans</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="/login" class="btn btn-primary">Login</a></li>
+                <li><a href="/register" class="btn btn-secondary">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero" style="padding: 80px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <h1>Invest Smart, Grow Faster in Uganda</h1>
+                    <p>Join thousands of Ugandan investors earning daily profits with our secure investment platform. Accepting MTN and Airtel Money.</p>
+                    <a href="/register" class="btn btn-primary hero-cta">Get Started Now</a>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80" alt="Investment Illustration" class="hero-img" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="plans" style="padding: 60px 0; background: #f5f5f5;">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: clamp(1.3rem, 5vw, 2.5rem);">Investment Plans</h2>
+            <div class="plans-grid">
+                <% plans.forEach((plan, index) => { %>
+                <div class="plan-card <%= index === 1 ? 'featured' : '' %>">
+                    <div class="plan-name"><%= plan.name %></div>
+                    <div class="plan-price">UGX <%= Number(plan.minimumAmount).toLocaleString() %><% if (plan.maximumAmount) { %> - <%= Number(plan.maximumAmount).toLocaleString() %><% } else { %>+<% } %></div>
+                    <ul class="plan-features">
+                        <li><i class="fas fa-check"></i> <%= plan.dailyRate %>% Daily Profit</li>
+                        <li><i class="fas fa-check"></i> <%= plan.durationDays %> Days Duration</li>
+                        <li><i class="fas fa-check"></i> Capital Return</li>
+                        <li><i class="fas fa-check"></i> <%= plan.referralBonusRate || 7 %>% Referral Bonus</li>
+                    </ul>
+                    <a href="/register" class="btn btn-primary">Invest Now</a>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" style="padding: 60px 0;">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: clamp(1.3rem, 5vw, 2.5rem);">Why Choose Us</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                <div style="text-align: center;"><i class="fas fa-shield-alt" style="font-size: clamp(2rem, 5vw, 3rem); color: var(--primary-color); margin-bottom: 1rem;"></i><h3>Secure Platform</h3><p>Your investments are safe with our advanced security measures.</p></div>
+                <div style="text-align: center;"><i class="fas fa-chart-line" style="font-size: clamp(2rem, 5vw, 3rem); color: var(--primary-color); margin-bottom: 1rem;"></i><h3>Daily Profits</h3><p>Earn daily returns on your investments automatically.</p></div>
+                <div style="text-align: center;"><i class="fas fa-mobile-alt" style="font-size: clamp(2rem, 5vw, 3rem); color: var(--primary-color); margin-bottom: 1rem;"></i><h3>Mobile Money</h3><p>Deposit and withdraw via MTN & Airtel Money.</p></div>
+                <div style="text-align: center;"><i class="fas fa-users" style="font-size: clamp(2rem, 5vw, 3rem); color: var(--primary-color); margin-bottom: 1rem;"></i><h3>Referral Program</h3><p>Earn bonuses by referring friends and family.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" style="padding: 60px 0; background: white;">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: clamp(1.3rem, 5vw, 2.5rem);">About The Whale Investors</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; align-items: stretch;">
+                <div class="card"><h3 style="margin-bottom: 1rem; color: var(--primary-color);">Who We Are</h3><p>We are building a Uganda-focused investment platform designed for accessibility, transparency, and mobile-first convenience.</p></div>
+                <div class="card"><h3 style="margin-bottom: 1rem; color: var(--primary-color);">Our Mission</h3><p>To make investing simpler for everyday users through clear plans, easy account management, and local payment support.</p></div>
+                <div class="card"><h3 style="margin-bottom: 1rem; color: var(--primary-color);">Why Investors Choose Us</h3><p>Simple dashboards, mobile money support, referral rewards, and manual admin review workflows for transparency.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section style="padding: 60px 0; background: var(--primary-color); color: white; text-align: center;">
+        <div class="container">
+            <h2 style="font-size: clamp(1.3rem, 5vw, 2.5rem); margin-bottom: 1rem;">Ready to Start Investing?</h2>
+            <p style="font-size: clamp(1rem, 3vw, 1.2rem); margin-bottom: 2rem;">Join thousands of satisfied Ugandan investors today.</p>
+            <a href="/register" class="btn" style="background: white; color: var(--primary-color); padding: 0.8rem 2rem; font-size: clamp(0.9rem, 3vw, 1.2rem); display: inline-block;">Create Account</a>
+        </div>
+    </section>
+
+    <footer style="background: var(--dark-color); color: white; padding: 2rem 0;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 1.5rem;">
+                <div><h3 style="margin-bottom: 1rem; font-size: 1.1rem;">InvestPro Uganda</h3><p style="font-size: 0.9rem;">Your trusted investment partner for financial growth in Uganda.</p></div>
+                <div><h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Quick Links</h3><ul style="list-style: none; font-size: 0.9rem;"><li><a href="#home" style="color: #ccc; text-decoration: none;">Home</a></li><li><a href="#plans" style="color: #ccc; text-decoration: none;">Plans</a></li><li><a href="#features" style="color: #ccc; text-decoration: none;">Features</a></li><li><a href="#about" style="color: #ccc; text-decoration: none;">About</a></li></ul></div>
+                <div><h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Contact</h3><p style="font-size: 0.9rem;">Email: support@investpro.ug</p><p style="font-size: 0.9rem;">Phone: +256 700 123456</p></div>
+                <div><h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Follow Us</h3><div style="display: flex; gap: 1rem;"><a href="#" style="color: white; font-size: 1.2rem;"><i class="fab fa-facebook"></i></a><a href="#" style="color: white; font-size: 1.2rem;"><i class="fab fa-twitter"></i></a><a href="#" style="color: white; font-size: 1.2rem;"><i class="fab fa-whatsapp"></i></a></div></div>
+            </div>
+            <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1rem; text-align: center; font-size: 0.9rem; color: #ccc;">© <%= new Date().getFullYear() %> The Whale Investors. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

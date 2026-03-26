@@ -1,0 +1,144 @@
+<%- include('../partials/head', { title }) %>
+<body style="padding-top: 0;">
+<div class="dashboard">
+  <%- include('../partials/adminSidebar') %>
+
+  <div class="main-content">
+    <%- include('../partials/alerts') %>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <h1 style="font-size: clamp(1.3rem, 5vw, 1.8rem);">Registered Users</h1>
+      <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <input type="text" id="searchInput" placeholder="Search users..." class="search-input" style="min-width: 200px; flex: 0 0 200px;">
+        <span style="color: #666; font-size: 0.9rem;">Total: <strong id="totalUsers"><%= totalUsers %></strong></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>All Users</h3>
+      </div>
+
+      <div class="table-responsive">
+        <table id="usersTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Registration Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach((user) => { %>
+              <tr data-name="<%= user.fullName.toLowerCase() %>" data-email="<%= user.email.toLowerCase() %>">
+                <td>
+                  <a href="#" onclick='showUserDetails(<%- JSON.stringify({
+                    name: user.fullName,
+                    email: user.email,
+                    phone: user.phone,
+                    joined: new Date(user.createdAt).toLocaleDateString(),
+                    balance: `UGX ${Number(user.balance).toLocaleString()}`,
+                    totalInvested: `UGX ${Number(user.totalInvested).toLocaleString()}`,
+                    referralCode: user.referralCode || "-",
+                    plan: user.latestInvestment?.plan?.name || "No active plan",
+                    amount: user.latestInvestment ? `UGX ${Number(user.latestInvestment.principal).toLocaleString()}` : "UGX 0",
+                    dailyProfit: user.latestInvestment ? `${Number((user.latestInvestment.principal * user.latestInvestment.dailyRate) / 100).toLocaleString()} (${user.latestInvestment.dailyRate}%)` : "-",
+                    startDate: user.latestInvestment?.startDate ? new Date(user.latestInvestment.startDate).toLocaleDateString() : "-",
+                    endDate: user.latestInvestment?.endDate ? new Date(user.latestInvestment.endDate).toLocaleDateString() : "-",
+                    maturity: user.latestInvestment?.endDate ? `${new Date(user.latestInvestment.endDate).toLocaleDateString()} (${user.latestInvestment.status})` : "No investment yet",
+                    status: user.isActive ? "Active" : "Suspended"
+                  }) %>); return false;' style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
+                    <%= user.fullName %>
+                  </a>
+                </td>
+                <td><%= user.email %></td>
+                <td><%= user.phone %></td>
+                <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                <td><span class="status-badge status-<%= user.isActive ? 'active' : 'pending' %>"><%= user.isActive ? 'Active' : 'Suspended' %></span></td>
+                <td>
+                  <div class="table-actions">
+                    <button class="btn btn-sm btn-primary" type="button" onclick='showUserDetails(<%- JSON.stringify({
+                      name: user.fullName,
+                      email: user.email,
+                      phone: user.phone,
+                      joined: new Date(user.createdAt).toLocaleDateString(),
+                      balance: `UGX ${Number(user.balance).toLocaleString()}`,
+                      totalInvested: `UGX ${Number(user.totalInvested).toLocaleString()}`,
+                      referralCode: user.referralCode || "-",
+                      plan: user.latestInvestment?.plan?.name || "No active plan",
+                      amount: user.latestInvestment ? `UGX ${Number(user.latestInvestment.principal).toLocaleString()}` : "UGX 0",
+                      dailyProfit: user.latestInvestment ? `${Number((user.latestInvestment.principal * user.latestInvestment.dailyRate) / 100).toLocaleString()} (${user.latestInvestment.dailyRate}%)` : "-",
+                      startDate: user.latestInvestment?.startDate ? new Date(user.latestInvestment.startDate).toLocaleDateString() : "-",
+                      endDate: user.latestInvestment?.endDate ? new Date(user.latestInvestment.endDate).toLocaleDateString() : "-",
+                      maturity: user.latestInvestment?.endDate ? `${new Date(user.latestInvestment.endDate).toLocaleDateString()} (${user.latestInvestment.status})` : "No investment yet",
+                      status: user.isActive ? "Active" : "Suspended"
+                    }) %>)'>View Details</button>
+                    <form method="POST" action="/admin/users/<%= user._id %>/toggle-status">
+                      <button class="btn btn-sm <%= user.isActive ? 'btn-danger' : 'btn-secondary' %>" type="submit"><%= user.isActive ? 'Suspend' : 'Activate' %></button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (!users.length) { %>
+              <tr><td colspan="6">No users found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="userModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">User Details</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>
+<script>
+document.getElementById('searchInput')?.addEventListener('input', function () {
+  const term = this.value.toLowerCase();
+  let visibleCount = 0;
+  document.querySelectorAll('#usersTable tbody tr').forEach((row) => {
+    const visible = (row.dataset.name || '').includes(term) || (row.dataset.email || '').includes(term);
+    row.style.display = visible ? '' : 'none';
+    if (visible) visibleCount += 1;
+  });
+  document.getElementById('totalUsers').textContent = visibleCount;
+});
+
+function showUserDetails(data) {
+  document.getElementById('modalTitle').textContent = `${data.name} - Investment Details`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display: grid; gap: 1rem;">
+      <div><strong>Email:</strong> ${data.email}</div>
+      <div><strong>Phone:</strong> ${data.phone}</div>
+      <div><strong>Registration Date:</strong> ${data.joined}</div>
+      <div><strong>Wallet Balance:</strong> ${data.balance}</div>
+      <div><strong>Total Invested:</strong> ${data.totalInvested}</div>
+      <div><strong>Referral Code:</strong> ${data.referralCode}</div>
+      <div><strong>Investment Plan:</strong> ${data.plan}</div>
+      <div><strong>Invested Amount:</strong> ${data.amount}</div>
+      <div><strong>Daily Profit:</strong> ${data.dailyProfit}</div>
+      <div><strong>Start Date:</strong> ${data.startDate}</div>
+      <div><strong>End Date:</strong> ${data.endDate}</div>
+      <div><strong>Maturity Status:</strong> ${data.maturity}</div>
+      <div><strong>Account Status:</strong> <span class="status-badge status-${data.status.toLowerCase() === 'active' ? 'active' : 'pending'}">${data.status}</span></div>
+    </div>
+  `;
+  document.getElementById('userModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('userModal').classList.remove('active');
+}
+</script>

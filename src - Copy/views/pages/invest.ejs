@@ -1,0 +1,156 @@
+<%- include('../partials/head', { title }) %>
+<body style="padding-top: 0;">
+<div class="dashboard">
+  <%- include('../partials/userSidebar') %>
+
+  <div class="main-content">
+    <%- include('../partials/alerts') %>
+    <h1 style="margin-bottom: 2rem;">Investment Plans</h1>
+
+    <div class="plans-grid">
+      <% plans.forEach((plan) => { %>
+        <div class="plan-card <%= plan.name.toLowerCase().includes('premium') ? 'featured' : '' %>">
+          <div class="plan-name"><%= plan.name %></div>
+          <div class="plan-price">
+            UGX <%= Number(plan.minimumAmount).toLocaleString() %>
+            <span><%= plan.maximumAmount ? 'to ' + Number(plan.maximumAmount).toLocaleString() : 'minimum' %></span>
+          </div>
+          <ul class="plan-features">
+            <li><i class="fas fa-check"></i> <%= plan.dailyRate %>% Daily Profit</li>
+            <li><i class="fas fa-check"></i> <%= plan.durationDays %> Days Duration</li>
+            <li><i class="fas fa-check"></i> Capital Return</li>
+            <li><i class="fas fa-check"></i> <%= plan.referralBonusRate || 5 %>% Referral Bonus</li>
+          </ul>
+          <button class="btn btn-primary" type="button" onclick="openInvestmentModal('<%= plan._id %>', '<%- plan.name.replace(/'/g, "\\'") %>', '<%= plan.minimumAmount %>', '<%= plan.dailyRate %>', '<%= plan.durationDays %>')">Invest Now</button>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="card" style="margin-top: 3rem;">
+      <div class="card-header">
+        <h3>Investment Calculator</h3>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+        <div>
+          <label>Investment Amount (UGX)</label>
+          <input type="number" id="calcAmount" class="form-control" value="1000000" onchange="calculateReturns()">
+        </div>
+        <div>
+          <label>Daily Return (%)</label>
+          <input type="number" id="calcRate" class="form-control" value="3" onchange="calculateReturns()">
+        </div>
+        <div>
+          <label>Duration (Days)</label>
+          <input type="number" id="calcDays" class="form-control" value="14" onchange="calculateReturns()">
+        </div>
+      </div>
+      <div style="margin-top: 2rem; padding: 1rem; background: #f5f5f5; border-radius: 5px;">
+        <h4>Projected Returns:</h4>
+        <p>Daily Profit: UGX <span id="dailyProfit">30,000</span></p>
+        <p>Total Profit: UGX <span id="totalProfit">420,000</span></p>
+        <p>Total Return (Capital + Profit): UGX <span id="totalReturn">1,420,000</span></p>
+      </div>
+    </div>
+
+    <% if (investments?.length) { %>
+      <div class="card" style="margin-top: 2rem;">
+        <div class="card-header"><h3>Recent Investments</h3></div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Daily Rate</th>
+                <th>Duration</th>
+                <th>Expected Return</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% investments.slice(0, 5).forEach((item) => { %>
+                <tr>
+                  <td><%= item.plan?.name || '-' %></td>
+                  <td>UGX <%= Number(item.principal).toLocaleString() %></td>
+                  <td><%= item.dailyRate %>%</td>
+                  <td><%= item.durationDays %> days</td>
+                  <td>UGX <%= Number(item.expectedReturn).toLocaleString() %></td>
+                  <td><span class="status-badge status-<%= item.status === 'completed' ? 'approved' : item.status === 'active' ? 'processing' : 'pending' %>"><%= item.status %></span></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<div id="investmentModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Confirm Investment</h2>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <form id="investmentForm" method="POST" action="/invest">
+      <input type="hidden" id="planId" name="planId">
+      <div class="form-group">
+        <label>Plan</label>
+        <input type="text" id="displayPlan" readonly class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Investment Amount (UGX)</label>
+        <input type="number" id="investAmount" name="amount" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Daily Profit (%)</label>
+        <input type="text" id="investRate" readonly class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Duration (Days)</label>
+        <input type="text" id="investDuration" readonly class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Wallet Balance</label>
+        <input type="text" value="UGX <%= Number(currentUser?.balance || 0).toLocaleString() %>" readonly class="form-control">
+      </div>
+      <p style="margin-bottom: 1rem; color: #666;">Investments are funded directly from your wallet balance.</p>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Investment</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>
+<script>
+function openInvestmentModal(planId, plan, amount, rate, days) {
+  document.getElementById('planId').value = planId;
+  document.getElementById('displayPlan').value = plan;
+  document.getElementById('investAmount').value = amount;
+  document.getElementById('investAmount').min = amount;
+  document.getElementById('investRate').value = rate + '%';
+  document.getElementById('investDuration').value = days + ' days';
+  document.getElementById('investmentModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('investmentModal').classList.remove('active');
+}
+
+function calculateReturns() {
+  const amount = parseFloat(document.getElementById('calcAmount').value) || 0;
+  const rate = parseFloat(document.getElementById('calcRate').value) || 0;
+  const days = parseFloat(document.getElementById('calcDays').value) || 0;
+  const dailyProfit = (amount * rate / 100);
+  const totalProfit = dailyProfit * days;
+  const totalReturn = amount + totalProfit;
+  document.getElementById('dailyProfit').textContent = Math.round(dailyProfit).toLocaleString();
+  document.getElementById('totalProfit').textContent = Math.round(totalProfit).toLocaleString();
+  document.getElementById('totalReturn').textContent = Math.round(totalReturn).toLocaleString();
+}
+calculateReturns();
+
+window.onclick = function(event) {
+  const modal = document.getElementById('investmentModal');
+  if (event.target === modal) closeModal();
+}
+</script>

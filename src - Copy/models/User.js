@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema({
   balance: { type: Number, default: 0 },
   totalInvested: { type: Number, default: 0 },
   totalProfit: { type: Number, default: 0 },
-  accruedProfit: { type: Number, default: 0 },
   referralEarnings: { type: Number, default: 0 },
   referralCode: { type: String, unique: true, index: true },
   referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },

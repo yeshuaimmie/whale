@@ -15,7 +15,7 @@ exports.getDashboard = asyncHandler(async (req, res) => {
   const totals = {
     balance: formatCurrency(freshUser.balance),
     totalInvested: formatCurrency(freshUser.totalInvested),
-    totalProfit: formatCurrency((freshUser.totalProfit || 0) + (freshUser.accruedProfit || 0)),
+    totalProfit: formatCurrency(freshUser.totalProfit),
     referralEarnings: formatCurrency(freshUser.referralEarnings),
     activeInvestmentsCount: data.activeInvestments.length,
   };

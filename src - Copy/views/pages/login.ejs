@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="InvestPro">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <title>Login - InvestPro Uganda</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body style="padding-top: 60px;">
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">The Whale Investors</a>
+            <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/">Home</a></li>
+                <li><a href="/#plans">Plans</a></li>
+                <li><a href="/#features">Features</a></li>
+                <li><a href="/#about">About</a></li>
+                <li><a href="/register" class="btn btn-primary">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div style="min-height: calc(100vh - 140px); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+        <div class="card" style="max-width: 500px; width: 100%;">
+            <div class="card-header">
+                <h2 style="color: var(--primary-color); font-size: clamp(1.3rem, 5vw, 1.5rem);">Login to Account</h2>
+            </div>
+            <%- include('../partials/alerts') %>
+            <form id="loginForm" method="POST" action="/auth/login">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+            </form>
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <p style="font-size: 0.95rem;">Don't have an account? <a href="/register" style="color: var(--primary-color); text-decoration: none;">Register here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

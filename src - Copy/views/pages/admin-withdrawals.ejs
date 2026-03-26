@@ -1,0 +1,323 @@
+<%- include('../partials/head', { title }) %>
+<body style="padding-top: 0;">
+<div class="dashboard">
+  <%- include('../partials/adminSidebar') %>
+
+  <div class="main-content">
+    <%- include('../partials/alerts') %>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <h1 style="font-size: clamp(1.3rem, 5vw, 1.8rem);">Withdrawal Management</h1>
+      <div class="inline-balance">
+        <i class="fas fa-clock"></i> Last updated: <span id="currentTime"></span>
+      </div>
+    </div>
+
+    <div class="total-calculator">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;">
+        <h3 style="margin: 0;">Withdrawal Calculator</h3>
+        <div class="period-selector">
+          <button class="period-btn active" type="button" onclick="setPeriod('today', this)">Today</button>
+          <button class="period-btn" type="button" onclick="setPeriod('week', this)">This Week</button>
+          <button class="period-btn" type="button" onclick="setPeriod('month', this)">This Month</button>
+          <button class="period-btn" type="button" onclick="setPeriod('all', this)">All Time</button>
+        </div>
+      </div>
+      <div class="calculator-grid">
+        <div class="calc-item">
+          <div class="calc-value" id="totalWithdrawals">UGX <%= Number(summary.totalAmount).toLocaleString() %></div>
+          <div class="calc-label">Total Withdrawals</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-value" id="completedWithdrawals"><%= summary.completedCount %></div>
+          <div class="calc-label">Completed</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-value" id="pendingWithdrawals"><%= summary.pendingCount + summary.processingCount %></div>
+          <div class="calc-label">Pending</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-value" id="avgWithdrawal">UGX <%= Number(summary.averageCompletedAmount).toLocaleString() %></div>
+          <div class="calc-label">Average Amount</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <h3 style="margin-bottom: 1rem; text-align: center;">Withdrawal Summary</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-value" id="totalAmount">UGX <%= Number(summary.totalAmount).toLocaleString() %></div>
+          <div class="summary-label">Total Amount</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" id="completedCount"><%= summary.completedCount %></div>
+          <div class="summary-label">Completed</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" id="pendingCount"><%= summary.pendingCount + summary.processingCount %></div>
+          <div class="summary-label">Pending</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" id="todayAmount">UGX <%= Number(summary.todayAmount).toLocaleString() %></div>
+          <div class="summary-label">Today</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search by name, email, or transaction ID...">
+      <select id="statusFilter" class="filter-select">
+        <option value="">All Status</option>
+        <option value="completed">Completed</option>
+        <option value="pending">Pending</option>
+        <option value="processing">Processing</option>
+        <option value="failed">Failed</option>
+      </select>
+      <select id="methodFilter" class="filter-select">
+        <option value="">All Methods</option>
+        <option value="mtn">MTN Mobile Money</option>
+        <option value="airtel">Airtel Money</option>
+        <option value="bank">Bank Transfer</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>Withdrawal Requests</h3>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-sm btn-secondary" type="button" onclick="exportWithdrawals()">
+            <i class="fas fa-download"></i> Export
+          </button>
+          <button class="btn btn-sm btn-primary" type="button" onclick="refreshWithdrawals(this)">
+            <i class="fas fa-sync"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="withdrawalsTable">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Reference</th>
+              <th>Requested</th>
+              <th>Completed</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% withdrawals.forEach((item) => { %>
+              <tr data-search="<%= `${item.user?.fullName || ''} ${item.user?.email || ''} ${item.reference}`.toLowerCase() %>" data-status="<%= item.status %>" data-method="<%= item.paymentMethod %>" data-requested="<%= item.createdAt %>" data-completed="<%= item.processedAt || '' %>" data-amount="<%= item.amount %>">
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="profile-avatar"><%= (item.user?.fullName || 'U').charAt(0).toUpperCase() %></div>
+                    <div>
+                      <div style="font-weight: 500;"><%= item.user?.fullName || '-' %></div>
+                      <div style="font-size: 0.8rem; color: #666;"><%= item.user?.email || '-' %></div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-weight: 600; color: var(--danger-color);">UGX <%= Number(item.amount).toLocaleString() %></td>
+                <td>
+                  <% if (item.paymentMethod === 'mtn') { %><i class="fas fa-mobile-alt mtn-color"></i> MTN Money<% } %>
+                  <% if (item.paymentMethod === 'airtel') { %><i class="fas fa-mobile-alt airtel-color"></i> Airtel Money<% } %>
+                  <% if (item.paymentMethod === 'bank') { %><i class="fas fa-university"></i> Bank Transfer<% } %>
+                </td>
+                <td style="font-family: monospace;"><%= item.reference %></td>
+                <td><%= new Date(item.createdAt).toLocaleString() %></td>
+                <td><%= item.processedAt ? new Date(item.processedAt).toLocaleString() : '-' %></td>
+                <td><span class="status-badge status-<%= item.status === 'completed' ? 'completed' : item.status %>"><%= item.status %></span></td>
+                <td>
+                  <div class="table-actions">
+                    <% if (item.status === 'pending') { %>
+                      <form method="POST" action="/admin/withdrawals/<%= item._id %>">
+                        <input type="hidden" name="status" value="processing">
+                        <button class="action-btn btn-process" type="submit"><i class="fas fa-play"></i> Process</button>
+                      </form>
+                    <% } %>
+                    <% if (item.status === 'processing') { %>
+                      <form method="POST" action="/admin/withdrawals/<%= item._id %>">
+                        <input type="hidden" name="status" value="completed">
+                        <button class="action-btn btn-complete" type="submit"><i class="fas fa-check"></i> Complete</button>
+                      </form>
+                      <form method="POST" action="/admin/withdrawals/<%= item._id %>">
+                        <input type="hidden" name="status" value="failed">
+                        <button class="action-btn btn-fail" type="submit"><i class="fas fa-times"></i> Fail</button>
+                      </form>
+                    <% } %>
+                    <% if (item.status === 'pending') { %>
+                      <form method="POST" action="/admin/withdrawals/<%= item._id %>">
+                        <input type="hidden" name="status" value="failed">
+                        <button class="action-btn btn-fail" type="submit"><i class="fas fa-times"></i> Fail</button>
+                      </form>
+                    <% } %>
+                    <button class="action-btn btn-view" type="button" onclick='viewWithdrawalDetails(<%- JSON.stringify({
+                      user: item.user?.fullName || "-",
+                      email: item.user?.email || "-",
+                      amount: `UGX ${Number(item.amount).toLocaleString()}`,
+                      method: item.paymentMethod === "mtn" ? "MTN Mobile Money" : item.paymentMethod === "airtel" ? "Airtel Money" : "Bank Transfer",
+                      phone: item.phone || "-",
+                      account: item.accountName || "-",
+                      reference: item.reference,
+                      requestedDate: new Date(item.createdAt).toLocaleString(),
+                      completedDate: item.processedAt ? new Date(item.processedAt).toLocaleString() : "Not completed",
+                      status: item.status,
+                      processingFee: "UGX 0",
+                      netAmount: `UGX ${Number(item.amount).toLocaleString()}`,
+                      notes: item.status === "failed" ? "Marked as failed by admin." : item.status === "completed" ? "Withdrawal completed successfully." : "Awaiting admin action."
+                    }) %>)'>
+                      <i class="fas fa-eye"></i> View
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (!withdrawals.length) { %>
+              <tr><td colspan="8">No withdrawal requests found.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="withdrawalModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Withdrawal Details</h3>
+      <span class="close" onclick="closeModal()">&times;</span>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<%- include('../partials/scripts') %>
+<script>
+let currentPeriod = 'today';
+
+function updateTime() {
+  const now = new Date();
+  document.getElementById('currentTime').textContent = now.toLocaleString();
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+function setPeriod(period, button) {
+  currentPeriod = period;
+  document.querySelectorAll('.period-btn').forEach((btn) => btn.classList.remove('active'));
+  button.classList.add('active');
+  calculateTotals();
+}
+
+function inPeriod(row) {
+  const requested = row.dataset.requested ? new Date(row.dataset.requested) : null;
+  const completed = row.dataset.completed ? new Date(row.dataset.completed) : null;
+  const base = completed || requested;
+  if (!base || Number.isNaN(base.getTime())) return currentPeriod === 'all';
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  if (currentPeriod === 'today') return base >= today;
+  if (currentPeriod === 'week') return base >= weekStart;
+  if (currentPeriod === 'month') return base >= monthStart;
+  return true;
+}
+
+function calculateTotals() {
+  const rows = Array.from(document.querySelectorAll('#withdrawalsTable tbody tr')).filter((row) => row.style.display !== 'none');
+  let total = 0;
+  let completed = 0;
+  let pending = 0;
+  let amounts = [];
+
+  rows.forEach((row) => {
+    if (!inPeriod(row)) return;
+    const amount = Number(row.dataset.amount || 0);
+    const status = (row.dataset.status || '').toLowerCase();
+    total += status === 'completed' ? amount : 0;
+    if (status === 'completed') {
+      completed += 1;
+      amounts.push(amount);
+    }
+    if (status === 'pending' || status === 'processing') pending += 1;
+  });
+
+  const avg = amounts.length ? Math.round(amounts.reduce((sum, value) => sum + value, 0) / amounts.length) : 0;
+  document.getElementById('totalWithdrawals').textContent = `UGX ${total.toLocaleString()}`;
+  document.getElementById('completedWithdrawals').textContent = completed;
+  document.getElementById('pendingWithdrawals').textContent = pending;
+  document.getElementById('avgWithdrawal').textContent = `UGX ${avg.toLocaleString()}`;
+  document.getElementById('totalAmount').textContent = `UGX ${total.toLocaleString()}`;
+  document.getElementById('completedCount').textContent = completed;
+  document.getElementById('pendingCount').textContent = pending;
+}
+
+function filterWithdrawals() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const statusFilter = document.getElementById('statusFilter').value;
+  const methodFilter = document.getElementById('methodFilter').value;
+
+  document.querySelectorAll('#withdrawalsTable tbody tr').forEach((row) => {
+    const matchesSearch = (row.dataset.search || '').includes(searchTerm);
+    const matchesStatus = !statusFilter || row.dataset.status === statusFilter;
+    const matchesMethod = !methodFilter || row.dataset.method === methodFilter;
+    row.style.display = matchesSearch && matchesStatus && matchesMethod ? '' : 'none';
+  });
+
+  calculateTotals();
+}
+
+document.getElementById('searchInput')?.addEventListener('input', filterWithdrawals);
+document.getElementById('statusFilter')?.addEventListener('change', filterWithdrawals);
+document.getElementById('methodFilter')?.addEventListener('change', filterWithdrawals);
+
+function viewWithdrawalDetails(data) {
+  document.getElementById('modalTitle').textContent = `Withdrawal Details - ${data.reference}`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="display: grid; gap: 1rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div><strong>User Name:</strong> ${data.user}</div>
+        <div><strong>Email:</strong> ${data.email}</div>
+        <div><strong>Phone:</strong> ${data.phone}</div>
+        <div><strong>Requested Amount:</strong> ${data.amount}</div>
+        <div><strong>Processing Fee:</strong> ${data.processingFee}</div>
+        <div><strong>Net Amount:</strong> ${data.netAmount}</div>
+        <div><strong>Method:</strong> ${data.method}</div>
+        <div><strong>Account:</strong> ${data.account}</div>
+        <div><strong>Reference:</strong> ${data.reference}</div>
+        <div><strong>Requested Date:</strong> ${data.requestedDate}</div>
+        <div><strong>Completed Date:</strong> ${data.completedDate}</div>
+        <div><strong>Status:</strong> <span class="status-badge status-${data.status === 'completed' ? 'completed' : data.status}">${data.status}</span></div>
+      </div>
+      <div><strong>Notes:</strong> ${data.notes}</div>
+    </div>
+  `;
+  document.getElementById('withdrawalModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('withdrawalModal').classList.remove('active');
+}
+
+function exportWithdrawals() {
+  window.print();
+}
+
+function refreshWithdrawals(button) {
+  const original = button.innerHTML;
+  button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+  setTimeout(() => window.location.reload(), 500);
+  setTimeout(() => { button.innerHTML = original; }, 1500);
+}
+
+calculateTotals();
+</script>

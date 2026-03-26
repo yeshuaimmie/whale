@@ -1,0 +1,148 @@
+<%- include('../partials/head', { title }) %>
+<body style="padding-top:0;">
+<div class="dashboard">
+  <%- include('../partials/userSidebar') %>
+
+  <div class="main-content">
+    <h1 style="margin-bottom: 2rem;">Referral Program</h1>
+    <%- include('../partials/alerts') %>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-info">
+          <h3>Total Referrals</h3>
+          <p><%= stats.totalReferrals %></p>
+        </div>
+        <div class="stat-icon" style="background: #e3f2fd; color: #1976d2;">
+          <i class="fas fa-users"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <h3>Active Referrals</h3>
+          <p><%= stats.activeReferrals %></p>
+        </div>
+        <div class="stat-icon" style="background: #e8f5e8; color: #388e3c;">
+          <i class="fas fa-user-check"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <h3>Referral Earnings</h3>
+          <p>UGX <%= Number(stats.referralEarnings).toLocaleString() %></p>
+        </div>
+        <div class="stat-icon" style="background: #fff3e0; color: #f57c00;">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <h3>Commission Rate</h3>
+          <p><%= stats.commissionRate %></p>
+        </div>
+        <div class="stat-icon" style="background: #f3e5f5; color: #7b1fa2;">
+          <i class="fas fa-percent"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 2rem;">
+      <div class="card-header">
+        <h3>Your Referral Link</h3>
+      </div>
+      <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <input id="referralLinkField" type="text" value="<%= referralLink %>" readonly style="flex: 1; padding: 0.8rem; border: 1px solid #ddd; border-radius: 5px;">
+        <button class="btn btn-primary" onclick="copyReferralLink()" type="button">Copy Link</button>
+        <button class="btn btn-secondary" onclick="shareReferral()" type="button">Share</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 2rem;">
+      <div class="card-header">
+        <h3>How Referral Works</h3>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+        <div style="text-align: center;">
+          <div style="width: 50px; height: 50px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">1</div>
+          <h4>Share Your Link</h4>
+          <p>Share your unique referral link with friends</p>
+        </div>
+        <div style="text-align: center;">
+          <div style="width: 50px; height: 50px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">2</div>
+          <h4>Friend Registers</h4>
+          <p>They sign up using your referral link</p>
+        </div>
+        <div style="text-align: center;">
+          <div style="width: 50px; height: 50px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">3</div>
+          <h4>They Invest</h4>
+          <p>They make their first investment</p>
+        </div>
+        <div style="text-align: center;">
+          <div style="width: 50px; height: 50px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">4</div>
+          <h4>You Earn</h4>
+          <p>Earn commission on their investment</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>Your Referrals</h3>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Joined Date</th>
+              <th>Investment</th>
+              <th>Your Commission</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% referralRows.forEach((row) => { %>
+              <tr>
+                <td><%= row.user.fullName %></td>
+                <td><%= new Date(row.user.createdAt).toISOString().slice(0, 10) %></td>
+                <td>UGX <%= Number(row.investedAmount || 0).toLocaleString() %></td>
+                <td>UGX <%= Number(row.totalCommission || 0).toLocaleString() %></td>
+                <td><span class="status-badge status-<%= row.status %>"><%= row.status === 'active' ? 'Active' : 'Pending' %></span></td>
+              </tr>
+            <% }) %>
+            <% if (!referralRows.length) { %>
+              <tr><td colspan="5">No referrals yet.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function copyReferralLink() {
+    const input = document.getElementById('referralLinkField');
+    navigator.clipboard.writeText(input.value);
+    alert('Referral link copied to clipboard!');
+  }
+
+  function shareReferral() {
+    const url = document.getElementById('referralLinkField').value;
+    if (navigator.share) {
+      navigator.share({
+        title: 'Join InvestPro Uganda',
+        text: 'Start investing with me on InvestPro and earn daily profits!',
+        url,
+      });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert('Sharing is not supported on this browser. The link has been copied instead.');
+    }
+  }
+</script>
+<%- include('../partials/scripts') %>
