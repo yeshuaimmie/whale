@@ -15,8 +15,8 @@
 
         <div style="margin-bottom: 1.5rem;">
           <h4 style="color: #ffcc00; margin-bottom: 0.5rem;">MTN Mobile Money</h4>
-          <p>Number: +256 700 123456</p>
-          <p>Name: InvestPro Uganda Ltd</p>
+          <p>Number: +256(0)787674344</p>
+          <p>Ameny Alfred</p>
           <p><strong>Steps:</strong></p>
           <ol style="margin-left: 1rem;">
             <li>Dial *165#</li>
@@ -28,9 +28,9 @@
         </div>
 
         <div style="margin-bottom: 1.5rem;">
-          <h4 style="color: #ed1c24; margin-bottom: 0.5rem;">Airtel Money</h4>
-          <p>Number: +256 700 123456</p>
-          <p>Name: InvestPro Uganda Ltd</p>
+          <h4 style="color: #ed1c24; margin-bottom: 0.5rem;">Mtn Money</h4>
+          <p>Number: +256(0)789669779 </p>
+          <p>Name: Akite Sarah</p>
           <p><strong>Steps:</strong></p>
           <ol style="margin-left: 1rem;">
             <li>Dial *185#</li>
@@ -39,6 +39,16 @@
             <li>Enter amount</li>
             <li>Enter PIN</li>
           </ol>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="color: #26a17b; margin-bottom: 0.5rem;">Crypto USDT Wallet</h4>
+          <p style="margin-bottom: 0.6rem;">Network: TRC20</p>
+          <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
+            <input id="usdtWallet" type="text" readonly value="TFo66zhvZyCHRFfBMyby5UX3YVYFF1J1zX" class="copy-field" style="flex:1 1 280px; background:#fff;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="copyTextValue('#usdtWallet')">Copy Address</button>
+          </div>
+          <small style="display:block; color:#666; margin-top:0.5rem;">Send only USDT (TRC20) to this wallet address.</small>
         </div>
 
         <div style="background: #f5f5f5; color:#222; padding: 1rem; border-radius: 5px;">
@@ -70,6 +80,7 @@
               <option value="mtn">MTN Mobile Money</option>
               <option value="airtel">Airtel Money</option>
               <option value="bank">Bank Transfer</option>
+              <option value="crypto_usdt">Crypto USDT Wallet</option>
             </select>
           </div>
 
@@ -117,7 +128,7 @@
               <tr>
                 <td><%= new Date(deposit.createdAt).toISOString().slice(0, 10) %></td>
                 <td>UGX <%= Number(deposit.amount).toLocaleString() %></td>
-                <td><%= deposit.paymentMethod === 'mtn' ? 'MTN Mobile Money' : deposit.paymentMethod === 'airtel' ? 'Airtel Money' : 'Bank Transfer' %></td>
+                <td><%= deposit.paymentMethod === 'mtn' ? 'MTN Mobile Money' : deposit.paymentMethod === 'airtel' ? 'Airtel Money' : deposit.paymentMethod === 'crypto_usdt' ? 'Crypto USDT Wallet' : 'Bank Transfer' %></td>
                 <td><span class="status-badge status-<%= deposit.status === 'approved' ? 'completed' : deposit.status %>"><%= deposit.status === 'approved' ? 'Completed' : deposit.status.charAt(0).toUpperCase() + deposit.status.slice(1) %></span></td>
               </tr>
             <% }) %>

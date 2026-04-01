@@ -44,7 +44,7 @@ exports.createInvestment = asyncHandler(async (req, res) => {
       referrerId: req.user.referredBy,
       referredUserId: req.user._id,
       investmentId: investment._id,
-      amount: (amount * (plan.referralBonusRate || 7)) / 100,
+      amount: (amount * Math.max(Number(plan.referralBonusRate) || 10, 10)) / 100,
     });
   }
 

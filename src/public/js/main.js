@@ -6,12 +6,73 @@
       hamburger.classList.toggle('active');
       navLinks.classList.toggle('active');
     });
+
+    document.addEventListener('click', function (event) {
+      const clickedInsideMenu = navLinks.contains(event.target);
+      const clickedHamburger = hamburger.contains(event.target);
+      if (!clickedInsideMenu && !clickedHamburger) {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('active');
+      }
+    });
+
+    navLinks.addEventListener('click', function (event) {
+      if (event.target.closest('a')) {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('active');
+      }
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('active');
+      }
+    });
   }
 })();
 
-function toggleSidebar() {
+(function () {
   const sidebar = document.getElementById('sidebar');
-  if (sidebar) sidebar.classList.toggle('active');
+  if (!sidebar) return;
+
+  let overlay = document.getElementById('sidebarOverlay');
+  if (!overlay) {
+    overlay = document.createElement('button');
+    overlay.type = 'button';
+    overlay.id = 'sidebarOverlay';
+    overlay.className = 'sidebar-overlay';
+    overlay.setAttribute('aria-label', 'Close sidebar');
+    document.body.appendChild(overlay);
+  }
+
+  function setSidebarVisibility(show) {
+    sidebar.classList.toggle('visible', show);
+    sidebar.classList.toggle('active', show);
+    overlay.classList.toggle('visible', show);
+    document.body.classList.toggle('sidebar-open', show);
+  }
+
+  window.toggleSidebar = function toggleSidebar() {
+    const show = !sidebar.classList.contains('visible');
+    setSidebarVisibility(show);
+  };
+
+  overlay.addEventListener('click', function () {
+    setSidebarVisibility(false);
+  });
+
+  window.addEventListener('resize', function () {
+    if (window.innerWidth > 768) {
+      setSidebarVisibility(false);
+    }
+  });
+})();
+
+function toggleSidebar() {
+  if (typeof window.toggleSidebar === 'function') {
+    window.toggleSidebar();
+  }
 }
 
 function copyTextValue(selector) {

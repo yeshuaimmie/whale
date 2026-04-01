@@ -48,16 +48,16 @@
     <section id="plans" style="padding: 60px 0; background: #f5f5f5;">
         <div class="container">
             <h2 style="text-align: center; margin-bottom: 3rem; font-size: clamp(1.3rem, 5vw, 2.5rem);">Investment Plans</h2>
-            <div class="plans-grid">
+            <div class="plans-grid home-plans-grid">
                 <% plans.forEach((plan, index) => { %>
-                <div class="plan-card <%= index === 1 ? 'featured' : '' %>">
+                <div class="plan-card">
                     <div class="plan-name"><%= plan.name %></div>
                     <div class="plan-price">UGX <%= Number(plan.minimumAmount).toLocaleString() %><% if (plan.maximumAmount) { %> - <%= Number(plan.maximumAmount).toLocaleString() %><% } else { %>+<% } %></div>
                     <ul class="plan-features">
                         <li><i class="fas fa-check"></i> <%= plan.dailyRate %>% Daily Profit</li>
                         <li><i class="fas fa-check"></i> <%= plan.durationDays %> Days Duration</li>
                         <li><i class="fas fa-check"></i> Capital Return</li>
-                        <li><i class="fas fa-check"></i> <%= plan.referralBonusRate || 7 %>% Referral Bonus</li>
+                        <li><i class="fas fa-check"></i> <%= Math.max(Number(plan.referralBonusRate) || 10, 10) %>% Referral Bonus</li>
                     </ul>
                     <a href="/register" class="btn btn-primary">Invest Now</a>
                 </div>

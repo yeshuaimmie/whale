@@ -6,7 +6,7 @@ const investmentPlanSchema = new mongoose.Schema({
   maximumAmount: { type: Number, default: null },
   dailyRate: { type: Number, required: true },
   durationDays: { type: Number, required: true },
-  referralBonusRate: { type: Number, default: 7 },
+  referralBonusRate: { type: Number, default: 10 },
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 

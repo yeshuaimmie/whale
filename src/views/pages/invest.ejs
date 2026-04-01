@@ -19,7 +19,7 @@
             <li><i class="fas fa-check"></i> <%= plan.dailyRate %>% Daily Profit</li>
             <li><i class="fas fa-check"></i> <%= plan.durationDays %> Days Duration</li>
             <li><i class="fas fa-check"></i> Capital Return</li>
-            <li><i class="fas fa-check"></i> <%= plan.referralBonusRate || 5 %>% Referral Bonus</li>
+            <li><i class="fas fa-check"></i> <%= Math.max(Number(plan.referralBonusRate) || 10, 10) %>% Referral Bonus</li>
           </ul>
           <button class="btn btn-primary" type="button" onclick="openInvestmentModal('<%= plan._id %>', '<%- plan.name.replace(/'/g, "\\'") %>', '<%= plan.minimumAmount %>', '<%= plan.dailyRate %>', '<%= plan.durationDays %>')">Invest Now</button>
         </div>
