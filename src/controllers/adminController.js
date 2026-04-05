@@ -218,11 +218,24 @@ exports.updateWithdrawalStatus = asyncHandler(async (req, res) => {
   withdrawal.processedAt = new Date();
   await withdrawal.save();
 
+  const debitedFromProfit = Number(withdrawal.debitedFromProfit ?? withdrawal.amount ?? 0);
+  const debitedFromReferral = Number(withdrawal.debitedFromReferral || 0);
+
   if (previousStatus !== 'failed' && nextStatus === 'failed') {
-    await User.findByIdAndUpdate(withdrawal.user, { $inc: { balance: withdrawal.amount } });
+    await User.findByIdAndUpdate(withdrawal.user, {
+      $inc: {
+        totalProfit: debitedFromProfit,
+        referralEarnings: debitedFromReferral,
+      },
+    });
   }
   if (previousStatus === 'failed' && nextStatus !== 'failed') {
-    await User.findByIdAndUpdate(withdrawal.user, { $inc: { balance: -withdrawal.amount } });
+    await User.findByIdAndUpdate(withdrawal.user, {
+      $inc: {
+        totalProfit: -debitedFromProfit,
+        referralEarnings: -debitedFromReferral,
+      },
+    });
   }
 
   await auditService.log({ actor: req.user._id, action: 'withdrawal-status-updated', targetModel: 'Withdrawal', targetId: withdrawal._id, metadata: { previousStatus, nextStatus } });
