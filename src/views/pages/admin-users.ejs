@@ -79,6 +79,9 @@
                     <form method="POST" action="/admin/users/<%= user._id %>/toggle-status">
                       <button class="btn btn-sm <%= user.isActive ? 'btn-danger' : 'btn-secondary' %>" type="submit"><%= user.isActive ? 'Suspend' : 'Activate' %></button>
                     </form>
+                    <form method="POST" action="/admin/users/<%= user._id %>/delete" onsubmit="return confirmDeleteUser('<%= user.fullName.replace(/'/g, "\\'") %>', <%= Number(user.investmentCount || 0) %>)">
+                      <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                    </form>
                   </div>
                 </td>
               </tr>
@@ -140,5 +143,15 @@ function showUserDetails(data) {
 
 function closeModal() {
   document.getElementById('userModal').classList.remove('active');
+}
+
+function confirmDeleteUser(name, investmentCount) {
+  const count = Number(investmentCount || 0);
+  if (count > 0) {
+    return window.confirm(
+      `${name} has ${count} investment${count > 1 ? 's' : ''}. Are you sure you want to delete this account and all related records permanently? This cannot be undone.`
+    );
+  }
+  return window.confirm(`Delete ${name} and all related records permanently? This cannot be undone.`);
 }
 </script>

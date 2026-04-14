@@ -4,6 +4,8 @@ const User = require('../models/User');
 const Deposit = require('../models/Deposit');
 const Withdrawal = require('../models/Withdrawal');
 const Investment = require('../models/Investment');
+const ReferralBonus = require('../models/ReferralBonus');
+const AuditLog = require('../models/AuditLog');
 const auditService = require('../services/auditService');
 const ApiError = require('../utils/ApiError');
 
@@ -110,6 +112,39 @@ exports.toggleUserStatus = asyncHandler(async (req, res) => {
   await user.save();
   await auditService.log({ actor: req.user._id, action: 'user-status-toggled', targetModel: 'User', targetId: user._id, metadata: { isActive: user.isActive } });
   res.redirect(`/admin/users?success=${encodeURIComponent(`User ${user.isActive ? 'activated' : 'disabled'} successfully`)}`);
+});
+
+exports.deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findOne({ _id: req.params.id, role: 'user' }).lean();
+  if (!user) return res.redirect('/admin/users?error=User not found');
+
+  await Promise.all([
+    Deposit.deleteMany({ user: user._id }),
+    Withdrawal.deleteMany({ user: user._id }),
+    Investment.deleteMany({ user: user._id }),
+    ReferralBonus.deleteMany({ $or: [{ referrer: user._id }, { referredUser: user._id }] }),
+    AuditLog.deleteMany({
+      $or: [
+        { actor: user._id },
+        { targetModel: 'User', targetId: user._id },
+      ],
+    }),
+    User.updateMany({ referredBy: user._id }, { $set: { referredBy: null } }),
+    User.deleteOne({ _id: user._id, role: 'user' }),
+  ]);
+
+  await auditService.log({
+    actor: req.user._id,
+    action: 'user-deleted',
+    targetModel: 'User',
+    targetId: user._id,
+    metadata: {
+      deletedUserEmail: user.email,
+      deletedUserName: user.fullName,
+    },
+  });
+
+  res.redirect('/admin/users?success=User and related records deleted successfully');
 });
 
 exports.getDepositsPage = asyncHandler(async (_req, res) => {
