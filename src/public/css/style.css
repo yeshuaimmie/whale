@@ -98,9 +98,6 @@ body {
     width: 100%;
     top: 0;
     z-index: 1000;
-    /* Backdrop blur for modern browsers */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
 }
 
 .navbar .container {

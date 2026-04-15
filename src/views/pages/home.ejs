@@ -14,15 +14,11 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .navbar {
-            background: transparent !important;
-            box-shadow: none !important;
-        }
-
         .hero.hero-home {
             position: relative;
             min-height: clamp(560px, 78vh, 720px);
             overflow: hidden;
+            margin-top: 60px;
             padding: 78px 0 40px;
             color: white;
             background: linear-gradient(135deg, rgba(10, 24, 39, 0.72) 0%, rgba(17, 60, 91, 0.52) 48%, rgba(76, 175, 80, 0.22) 100%),
@@ -91,18 +87,42 @@
 
         @media (max-width: 768px) {
             .hero.hero-home {
-                min-height: auto;
+                min-height: 100vh;
+                margin-top: 60px;
                 padding-top: 92px;
                 background-position: center center;
             }
 
             .hero.hero-home .hero-grid {
                 grid-template-columns: 1fr;
+                min-height: calc(100vh - 132px);
+                align-items: center;
+                justify-items: center;
+            }
+
+            .hero.hero-home .hero-content {
+                width: 100%;
+                max-width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                min-height: calc(100vh - 180px);
+            }
+
+            .hero.hero-home .hero-content p {
+                max-width: 32rem;
+            }
+
+            .hero.hero-home .hero-cta {
+                align-self: center;
+                margin-top: 0.5rem;
             }
         }
     </style>
 </head>
-<body style="padding-top: 60px;">
+<body style="padding-top: 0; background: #fff;">
     <nav class="navbar">
         <div class="container">
             <a href="/" class="logo">
