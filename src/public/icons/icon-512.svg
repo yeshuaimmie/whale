@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Whale Investors icon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f8f4b"/>
+      <stop offset="1" stop-color="#0f5ea8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <path d="M96 283c45 0 72-20 106-54 31-31 63-53 124-53 45 0 80 13 118 43-8 32-27 61-54 84-51 42-115 58-187 58-42 0-77-6-107-16z" fill="#fff" opacity="0.96"/>
+  <path d="M332 250c27-17 52-25 77-25 7 0 14 1 23 2-14 23-27 41-42 56" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="240" cy="240" r="13" fill="#0f5ea8"/>
+  <text x="256" y="442" text-anchor="middle" fill="#ffffff" font-size="96" font-family="Segoe UI, Arial, sans-serif" font-weight="700">WI</text>
+</svg>
