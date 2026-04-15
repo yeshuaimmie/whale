@@ -62,6 +62,18 @@
     setSidebarVisibility(false);
   });
 
+  sidebar.addEventListener('click', function (event) {
+    if (event.target.closest('a')) {
+      setSidebarVisibility(false);
+    }
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      setSidebarVisibility(false);
+    }
+  });
+
   window.addEventListener('resize', function () {
     if (window.innerWidth > 768) {
       setSidebarVisibility(false);
@@ -81,3 +93,48 @@ function copyTextValue(selector) {
   navigator.clipboard.writeText(el.value || el.textContent || '');
   alert('Copied successfully');
 }
+
+(function () {
+  const PASSWORD_READY_ATTR = 'data-password-toggle-ready';
+
+  function attachPasswordToggles() {
+    const passwordInputs = document.querySelectorAll('input[type="password"]:not([' + PASSWORD_READY_ATTR + '])');
+
+    passwordInputs.forEach(function (input) {
+      input.setAttribute(PASSWORD_READY_ATTR, 'true');
+
+      if (input.parentElement && input.parentElement.classList.contains('password-field-wrap')) {
+        return;
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'password-field-wrap';
+
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.type = 'button';
+      toggleBtn.className = 'password-toggle';
+      toggleBtn.setAttribute('aria-label', 'Show password');
+      toggleBtn.setAttribute('aria-pressed', 'false');
+      toggleBtn.textContent = 'Show';
+
+      toggleBtn.addEventListener('click', function () {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        toggleBtn.textContent = isPassword ? 'Hide' : 'Show';
+        toggleBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+        toggleBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+      });
+
+      wrapper.appendChild(toggleBtn);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachPasswordToggles);
+  } else {
+    attachPasswordToggles();
+  }
+})();

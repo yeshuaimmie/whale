@@ -195,17 +195,26 @@ exports.getSettingsPage = asyncHandler(async (req, res) => {
 
 exports.updateSettingsPassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword, confirmPassword } = req.body;
-  if (!currentPassword || !newPassword || !confirmPassword) throw new ApiError(400, 'All password fields are required');
-  if (newPassword !== confirmPassword) throw new ApiError(400, 'New passwords do not match');
-  if (newPassword.length < 8) throw new ApiError(400, 'New password must be at least 8 characters');
+  if (!currentPassword || !newPassword || !confirmPassword) return res.redirect('/admin/settings?error=All password fields are required');
+  if (newPassword !== confirmPassword) return res.redirect('/admin/settings?error=New passwords do not match');
+  if (newPassword.length < 8) return res.redirect('/admin/settings?error=New password must be at least 8 characters');
 
   const admin = await User.findById(req.user._id);
+  if (!admin) throw new ApiError(404, 'Admin account not found');
   const isMatch = await bcrypt.compare(currentPassword, admin.password);
-  if (!isMatch) throw new ApiError(400, 'Current password is incorrect');
+  if (!isMatch) return res.redirect('/admin/settings?error=Current password is incorrect');
 
   admin.password = await bcrypt.hash(newPassword, 12);
   admin.refreshTokenHash = null;
   await admin.save();
+
+  await auditService.log({
+    actor: req.user._id,
+    action: 'admin-password-updated',
+    targetModel: 'User',
+    targetId: admin._id,
+  });
+
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
   res.redirect('/login?success=Password changed successfully. Please sign in again.');

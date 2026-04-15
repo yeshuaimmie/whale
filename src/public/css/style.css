@@ -334,6 +334,39 @@ body {
     background: var(--white);
 }
 
+.password-field-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.password-field-wrap input {
+    padding-right: 4.5rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--secondary-color);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.25rem 0.35rem;
+    border-radius: 6px;
+}
+
+.password-toggle:hover {
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.password-toggle:focus {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
+}
+
 /* ==========================================
    CARD COMPONENT STYLES
    ========================================== */
@@ -1813,7 +1846,7 @@ tr:hover {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.28s ease;
-    z-index: 1190;
+    z-index: 1050;
 }
 
 .sidebar-overlay.visible {

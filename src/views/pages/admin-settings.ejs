@@ -17,10 +17,11 @@
       </div>
       <div class="card">
         <div class="card-header"><h3>Change Password</h3></div>
-        <form method="POST" action="/admin/settings/password">
-          <div class="form-group"><label>Current Password</label><input type="password" name="currentPassword" required></div>
-          <div class="form-group"><label>New Password</label><input type="password" name="newPassword" required></div>
-          <div class="form-group"><label>Confirm New Password</label><input type="password" name="confirmPassword" required></div>
+        <form method="POST" action="/admin/settings/password" id="adminPasswordForm">
+          <div class="form-group"><label>Current Password</label><input type="password" name="currentPassword" id="currentPassword" required autocomplete="current-password"></div>
+          <div class="form-group"><label>New Password</label><input type="password" name="newPassword" id="newPassword" required minlength="8" autocomplete="new-password"></div>
+          <div class="form-group"><label>Confirm New Password</label><input type="password" name="confirmPassword" id="confirmPassword" required minlength="8" autocomplete="new-password"></div>
+          <small id="passwordError" style="display:none; color:#dc2626; margin-bottom:0.75rem;"></small>
           <button class="btn btn-primary" type="submit">Update Password</button>
         </form>
       </div>
@@ -28,3 +29,36 @@
   </div>
 </div>
 <%- include('../partials/scripts') %>
+<script>
+document.getElementById('adminPasswordForm')?.addEventListener('submit', function (event) {
+  const currentPassword = document.getElementById('currentPassword')?.value || '';
+  const newPassword = document.getElementById('newPassword')?.value || '';
+  const confirmPassword = document.getElementById('confirmPassword')?.value || '';
+  const errorEl = document.getElementById('passwordError');
+
+  if (!errorEl) return;
+
+  errorEl.style.display = 'none';
+  errorEl.textContent = '';
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    event.preventDefault();
+    errorEl.textContent = 'All password fields are required.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    event.preventDefault();
+    errorEl.textContent = 'New password must be at least 8 characters.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    event.preventDefault();
+    errorEl.textContent = 'New password and confirmation do not match.';
+    errorEl.style.display = 'block';
+  }
+});
+</script>
