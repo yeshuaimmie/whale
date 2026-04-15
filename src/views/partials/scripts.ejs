@@ -16,6 +16,19 @@
 	</div>
 </div>
 
+<div id="androidInstallHint" class="ios-install-hint" hidden>
+	<div class="ios-install-card" role="dialog" aria-label="Install on Android">
+		<strong>Install on Android</strong>
+		<p>Add this app to your device:</p>
+		<ol>
+			<li>Tap the Install App button.</li>
+			<li>Confirm the install prompt.</li>
+			<li>Open the app from your home screen.</li>
+		</ol>
+		<button id="androidInstallDismiss" type="button" class="ios-install-dismiss">Got it</button>
+	</div>
+</div>
+
 <script src="/js/main.js"></script>
 <script>
 	(function setupPWA() {
@@ -23,24 +36,34 @@
 		const installBtn = document.getElementById('installAppBtn');
 		const iosInstallHint = document.getElementById('iosInstallHint');
 		const iosInstallDismiss = document.getElementById('iosInstallDismiss');
+		const androidInstallHint = document.getElementById('androidInstallHint');
+		const androidInstallDismiss = document.getElementById('androidInstallDismiss');
 		let deferredInstallPrompt = null;
-		const iosHintDismissedKey = 'ios-install-hint-dismissed';
 
 		const ua = window.navigator.userAgent || '';
 		const isIOS = /iphone|ipad|ipod/i.test(ua);
+		const isAndroid = /android/i.test(ua);
 		const isSafari = /safari/i.test(ua) && !/crios|fxios|edgios|opios/i.test(ua);
 		const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
 		if (iosInstallDismiss) {
 			iosInstallDismiss.addEventListener('click', () => {
 				if (iosInstallHint) iosInstallHint.hidden = true;
-				window.localStorage.setItem(iosHintDismissedKey, '1');
+			});
+		}
+
+		if (androidInstallDismiss) {
+			androidInstallDismiss.addEventListener('click', () => {
+				if (androidInstallHint) androidInstallHint.hidden = true;
 			});
 		}
 
 		if (isIOS && isSafari && !isStandalone && iosInstallHint) {
-			const isDismissed = window.localStorage.getItem(iosHintDismissedKey) === '1';
-			if (!isDismissed) iosInstallHint.hidden = false;
+			iosInstallHint.hidden = false;
+		}
+
+		if (isAndroid && !isStandalone && androidInstallHint) {
+			androidInstallHint.hidden = false;
 		}
 
 		window.addEventListener('beforeinstallprompt', (event) => {
@@ -63,6 +86,7 @@
 			deferredInstallPrompt = null;
 			if (installBtn) installBtn.hidden = true;
 			if (iosInstallHint) iosInstallHint.hidden = true;
+			if (androidInstallHint) androidInstallHint.hidden = true;
 		});
 
 		if (supportsServiceWorker) {
@@ -114,6 +138,10 @@
 
 	.ios-install-hint[hidden] {
 		display: none;
+	}
+
+	#androidInstallHint {
+		bottom: 6.2rem;
 	}
 
 	.ios-install-card {
