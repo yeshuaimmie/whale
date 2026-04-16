@@ -33,16 +33,13 @@
         </div>
     </nav>
 
-    <section id="home" class="hero" style="padding: 80px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <section id="home" class="hero" style="padding: 80px 0; background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1600&q=80'); background-size: cover; background-position: center; background-repeat: no-repeat; color: white;">
         <div class="container">
-            <div class="hero-grid">
+            <div class="hero-grid" style="grid-template-columns: 1fr; max-width: 760px;">
                 <div class="hero-content">
                     <h1>Invest Smart, Grow Faster in Uganda</h1>
                     <p>Join thousands of Ugandan investors earning daily profits with our secure investment platform. Accepting MTN and Airtel Money.</p>
                     <a href="/register" class="btn btn-primary hero-cta">Get Started Now</a>
-                </div>
-                <div class="hero-image">
-                    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80" alt="Investment Illustration" class="hero-img" loading="lazy">
                 </div>
             </div>
         </div>
@@ -53,14 +50,17 @@
             <h2 style="text-align: center; margin-bottom: 3rem; font-size: clamp(1.3rem, 5vw, 2.5rem);">Investment Plans</h2>
             <div class="plans-grid home-plans-grid">
                 <% plans.forEach((plan, index) => { %>
+                <% const planName = (plan.name || '').toLowerCase(); %>
+                <% const planIcon = planName.includes('starter') || planName.includes('basic') ? 'fa-seedling' : planName.includes('standard') || planName.includes('silver') ? 'fa-chart-line' : planName.includes('premium') || planName.includes('gold') ? 'fa-gem' : planName.includes('vip') || planName.includes('ultimate') ? 'fa-crown' : 'fa-coins'; %>
                 <div class="plan-card">
+                    <div style="text-align:center; margin-bottom: 0.9rem;"><i class="fas <%= planIcon %>" style="font-size: 1.8rem; color: var(--primary-color);"></i></div>
                     <div class="plan-name"><%= plan.name %></div>
                     <div class="plan-price">UGX <%= Number(plan.minimumAmount).toLocaleString() %><% if (plan.maximumAmount) { %> - <%= Number(plan.maximumAmount).toLocaleString() %><% } else { %>+<% } %></div>
                     <ul class="plan-features">
-                        <li><i class="fas fa-check"></i> <%= plan.dailyRate %>% Daily Profit</li>
-                        <li><i class="fas fa-check"></i> <%= plan.durationDays %> Days Duration</li>
-                        <li><i class="fas fa-check"></i> Capital Return</li>
-                        <li><i class="fas fa-check"></i> <%= Math.max(Number(plan.referralBonusRate) || 10, 10) %>% Referral Bonus</li>
+                        <li><i class="fas fa-chart-line"></i> <%= plan.dailyRate %>% Daily Profit</li>
+                        <li><i class="fas fa-clock"></i> <%= plan.durationDays %> Days Duration</li>
+                        <li><i class="fas fa-piggy-bank"></i> Capital Return</li>
+                        <li><i class="fas fa-users"></i> <%= Math.max(Number(plan.referralBonusRate) || 10, 10) %>% Referral Bonus</li>
                     </ul>
                     <a href="/register" class="btn btn-primary">Invest Now</a>
                 </div>

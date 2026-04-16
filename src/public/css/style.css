@@ -1668,7 +1668,7 @@ tr:hover {
         height: 100vh;
         transform: translateX(-105%);
         transition: transform 0.28s ease;
-        z-index: 1100;
+        z-index: 1200;
     }
 
     .dashboard .sidebar.active,
