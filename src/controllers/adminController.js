@@ -4,6 +4,8 @@ const User = require('../models/User');
 const Deposit = require('../models/Deposit');
 const Withdrawal = require('../models/Withdrawal');
 const Investment = require('../models/Investment');
+const ReferralBonus = require('../models/ReferralBonus');
+const AuditLog = require('../models/AuditLog');
 const auditService = require('../services/auditService');
 const ApiError = require('../utils/ApiError');
 
@@ -112,6 +114,39 @@ exports.toggleUserStatus = asyncHandler(async (req, res) => {
   res.redirect(`/admin/users?success=${encodeURIComponent(`User ${user.isActive ? 'activated' : 'disabled'} successfully`)}`);
 });
 
+exports.deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findOne({ _id: req.params.id, role: 'user' }).lean();
+  if (!user) return res.redirect('/admin/users?error=User not found');
+
+  await Promise.all([
+    Deposit.deleteMany({ user: user._id }),
+    Withdrawal.deleteMany({ user: user._id }),
+    Investment.deleteMany({ user: user._id }),
+    ReferralBonus.deleteMany({ $or: [{ referrer: user._id }, { referredUser: user._id }] }),
+    AuditLog.deleteMany({
+      $or: [
+        { actor: user._id },
+        { targetModel: 'User', targetId: user._id },
+      ],
+    }),
+    User.updateMany({ referredBy: user._id }, { $set: { referredBy: null } }),
+    User.deleteOne({ _id: user._id, role: 'user' }),
+  ]);
+
+  await auditService.log({
+    actor: req.user._id,
+    action: 'user-deleted',
+    targetModel: 'User',
+    targetId: user._id,
+    metadata: {
+      deletedUserEmail: user.email,
+      deletedUserName: user.fullName,
+    },
+  });
+
+  res.redirect('/admin/users?success=User and related records deleted successfully');
+});
+
 exports.getDepositsPage = asyncHandler(async (_req, res) => {
   const today = startOfToday();
   const deposits = await Deposit.find().populate('user', 'fullName email phone').sort({ createdAt: -1 }).lean();
@@ -160,17 +195,26 @@ exports.getSettingsPage = asyncHandler(async (req, res) => {
 
 exports.updateSettingsPassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword, confirmPassword } = req.body;
-  if (!currentPassword || !newPassword || !confirmPassword) throw new ApiError(400, 'All password fields are required');
-  if (newPassword !== confirmPassword) throw new ApiError(400, 'New passwords do not match');
-  if (newPassword.length < 8) throw new ApiError(400, 'New password must be at least 8 characters');
+  if (!currentPassword || !newPassword || !confirmPassword) return res.redirect('/admin/settings?error=All password fields are required');
+  if (newPassword !== confirmPassword) return res.redirect('/admin/settings?error=New passwords do not match');
+  if (newPassword.length < 8) return res.redirect('/admin/settings?error=New password must be at least 8 characters');
 
   const admin = await User.findById(req.user._id);
+  if (!admin) throw new ApiError(404, 'Admin account not found');
   const isMatch = await bcrypt.compare(currentPassword, admin.password);
-  if (!isMatch) throw new ApiError(400, 'Current password is incorrect');
+  if (!isMatch) return res.redirect('/admin/settings?error=Current password is incorrect');
 
   admin.password = await bcrypt.hash(newPassword, 12);
   admin.refreshTokenHash = null;
   await admin.save();
+
+  await auditService.log({
+    actor: req.user._id,
+    action: 'admin-password-updated',
+    targetModel: 'User',
+    targetId: admin._id,
+  });
+
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
   res.redirect('/login?success=Password changed successfully. Please sign in again.');

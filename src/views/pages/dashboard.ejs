@@ -16,6 +16,169 @@
                 <div class="stat-card"><div class="stat-info"><h3>Referral Earnings</h3><p style="font-size: clamp(1.2rem, 4vw, 1.8rem);"><%= totals.referralEarnings %></p></div><div class="stat-icon" style="background: #f3e5f5; color: #7b1fa2;"><i class="fas fa-users"></i></div></div>
             </div>
 
+            <% 
+              const latestActiveInvestment = data.activeInvestments.length
+                ? data.activeInvestments.reduce((latest, inv) => new Date(inv.startDate) > new Date(latest.startDate) ? inv : latest, data.activeInvestments[0])
+                : null;
+              const cycleDurationDays = 60;
+            %>
+            <style>
+                .investment-progress-card {
+                    margin-bottom: 2rem;
+                }
+
+                .investment-progress-wrap {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 1.5rem;
+                    align-items: stretch;
+                    justify-content: flex-start;
+                }
+
+                .progress-ring {
+                    --ring-value: 100;
+                    width: clamp(140px, 30vw, 180px);
+                    height: clamp(140px, 30vw, 180px);
+                    border-radius: 50%;
+                    background: conic-gradient(#4CAF50 calc(var(--ring-value) * 1%), #ffffff 0%);
+                    display: grid;
+                    place-items: center;
+                    box-shadow: inset 0 0 0 1px rgba(76, 175, 80, 0.2), 0 8px 20px rgba(0, 0, 0, 0.08);
+                    position: relative;
+                }
+
+                .progress-ring::before {
+                    content: '';
+                    position: absolute;
+                    inset: 12px;
+                    border-radius: 50%;
+                    background: #f9fbff;
+                }
+
+                .progress-ring-content {
+                    position: relative;
+                    z-index: 1;
+                    text-align: center;
+                }
+
+                .progress-ring-percent {
+                    font-size: clamp(1.4rem, 5vw, 1.8rem);
+                    font-weight: 700;
+                    color: #2f4f2f;
+                    line-height: 1.1;
+                }
+
+                .progress-ring-label {
+                    font-size: 0.85rem;
+                    color: #667085;
+                }
+
+                .investment-progress-meta {
+                    flex: 1;
+                    min-width: min(100%, 280px);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.8rem;
+                }
+
+                .progress-info-card {
+                    flex: 1;
+                    min-width: 260px;
+                    background: #ffffff;
+                    border: 1px solid rgba(0, 0, 0, 0.08);
+                    border-radius: 12px;
+                    padding: 1rem;
+                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    gap: 0.5rem;
+                }
+
+                .countdown-box {
+                    background: linear-gradient(135deg, #f5fff6 0%, #eef8ff 100%);
+                    border: 1px solid rgba(76, 175, 80, 0.25);
+                    border-radius: 12px;
+                    padding: 0.9rem 1rem;
+                    flex: 1;
+                    min-width: 260px;
+                    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                }
+
+                .countdown-label {
+                    display: block;
+                    font-size: 0.85rem;
+                    color: #5b6b7a;
+                    margin-bottom: 0.3rem;
+                }
+
+                .countdown-timer {
+                    font-size: clamp(1.2rem, 4.5vw, 1.8rem);
+                    font-weight: 700;
+                    letter-spacing: 0.02em;
+                    color: #1f7a1f;
+                }
+
+                .countdown-subtext {
+                    display: block;
+                    margin-top: 0.25rem;
+                    color: #6b7280;
+                    font-size: 0.8rem;
+                }
+
+                @media (max-width: 640px) {
+                    .investment-progress-wrap {
+                        justify-content: center;
+                        text-align: left;
+                    }
+
+                    .countdown-box,
+                    .progress-info-card {
+                        min-width: 100%;
+                    }
+                }
+            </style>
+
+            <div class="card investment-progress-card">
+                <div class="card-header">
+                    <h3>Investment Progress (60 Days)</h3>
+                </div>
+
+                <% if (latestActiveInvestment) { %>
+                <div
+                    class="investment-progress-wrap"
+                    id="investmentProgressWidget"
+                    data-start-date="<%= new Date(latestActiveInvestment.startDate).toISOString() %>"
+                    data-duration-days="<%= cycleDurationDays %>"
+                    data-investment-amount="<%= Number(latestActiveInvestment.principal).toLocaleString() %>"
+                >
+                    <div class="progress-ring" id="investmentProgressRing" style="--ring-value: 100;">
+                        <div class="progress-ring-content">
+                            <div class="progress-ring-percent" id="ringPercentText">100%</div>
+                            <div class="progress-ring-label" id="ringDaysText">60 days left</div>
+                        </div>
+                    </div>
+
+                    <div class="countdown-box">
+                        <span class="countdown-label">Next Daily Profit In</span>
+                        <span class="countdown-timer" id="nextProfitCountdown">--:--:--</span>
+                        <span class="countdown-subtext" id="nextProfitAt">Calculating next payout...</span>
+                    </div>
+
+                    <div class="progress-info-card investment-progress-meta">
+                        <div><strong>Current Investment:</strong> UGX <span id="investmentAmount"><%= Number(latestActiveInvestment.principal).toLocaleString() %></span></div>
+                        <div><strong>Started:</strong> <%= new Date(latestActiveInvestment.startDate).toLocaleString() %></div>
+                        <div><strong>Ends:</strong> <span id="investmentEndDate"></span></div>
+                    </div>
+                </div>
+                <% } else { %>
+                <p style="color: #666;">You do not have an active investment yet. Once you invest, this circular tracker will start from full and count down for 60 days.</p>
+                <% } %>
+            </div>
+
             <div class="card" style="margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div style="flex: 1; min-width: 200px;">
@@ -92,4 +255,71 @@
         navigator.clipboard.writeText(input.value);
         alert('Referral link copied to clipboard!');
       }
+
+            function formatCountdown(ms) {
+                const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                return [hours, minutes, seconds]
+                    .map((value) => String(value).padStart(2, '0'))
+                    .join(':');
+            }
+
+            function initInvestmentProgress() {
+                const widget = document.getElementById('investmentProgressWidget');
+                if (!widget) return;
+
+                const ring = document.getElementById('investmentProgressRing');
+                const ringPercentText = document.getElementById('ringPercentText');
+                const ringDaysText = document.getElementById('ringDaysText');
+                const endDateEl = document.getElementById('investmentEndDate');
+                const countdownEl = document.getElementById('nextProfitCountdown');
+                const nextProfitAtEl = document.getElementById('nextProfitAt');
+
+                const startDate = new Date(widget.dataset.startDate);
+                const durationDays = Number(widget.dataset.durationDays) || 60;
+                const dayMs = 24 * 60 * 60 * 1000;
+                const durationMs = durationDays * dayMs;
+                const endDate = new Date(startDate.getTime() + durationMs);
+
+                endDateEl.textContent = endDate.toLocaleString();
+
+                function updateWidget() {
+                    const now = new Date();
+                    const elapsedMs = Math.max(0, now.getTime() - startDate.getTime());
+                    const remainingMs = Math.max(0, endDate.getTime() - now.getTime());
+
+                    const remainingRatio = Math.max(0, Math.min(1, 1 - elapsedMs / durationMs));
+                    const remainingPercent = Math.round(remainingRatio * 100);
+                    const remainingDays = Math.ceil(remainingMs / dayMs);
+
+                    ring.style.setProperty('--ring-value', String(remainingPercent));
+                    ringPercentText.textContent = `${remainingPercent}%`;
+                    ringDaysText.textContent = remainingMs > 0 ? `${remainingDays} day${remainingDays === 1 ? '' : 's'} left` : 'Completed';
+
+                    if (remainingMs <= 0) {
+                        countdownEl.textContent = '00:00:00';
+                        nextProfitAtEl.textContent = 'Investment period is complete.';
+                        return;
+                    }
+
+                    const elapsedDays = Math.floor(elapsedMs / dayMs);
+                    let nextProfitDate = new Date(startDate.getTime() + ((elapsedDays + 1) * dayMs));
+
+                    if (nextProfitDate.getTime() > endDate.getTime()) {
+                        nextProfitDate = endDate;
+                    }
+
+                    const countdownMs = Math.max(0, nextProfitDate.getTime() - now.getTime());
+                    countdownEl.textContent = formatCountdown(countdownMs);
+                    nextProfitAtEl.textContent = `Next payout: ${nextProfitDate.toLocaleString()}`;
+                }
+
+                updateWidget();
+                setInterval(updateWidget, 1000);
+            }
+
+            initInvestmentProgress();
     </script>

@@ -11,6 +11,7 @@ router.use('/admin', requireAuth, requireRole('admin'), adminLimiter);
 router.get('/admin', adminController.getDashboard);
 router.get('/admin/users', adminController.getUsersPage);
 router.post('/admin/users/:id/toggle-status', adminController.toggleUserStatus);
+router.post('/admin/users/:id/delete', adminController.deleteUser);
 router.get('/admin/deposits', adminController.getDepositsPage);
 router.post('/admin/deposits/:id', adminController.updateDepositStatus);
 router.get('/admin/withdrawals', adminController.getWithdrawalsPage);
