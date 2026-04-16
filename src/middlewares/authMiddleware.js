@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { verifyAccessToken } = require('../utils/jwt');
+const getAppUrl = require('../utils/getAppUrl');
 
 exports.attachUserToRequest = async (req, _res, next) => {
   try {
@@ -28,6 +29,6 @@ exports.attachLocals = (req, res, next) => {
   res.locals.currentUser = req.user || null;
   res.locals.currentPath = req.path;
   res.locals.query = req.query || {};
-  res.locals.appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+  res.locals.appUrl = getAppUrl(req);
   next();
 };

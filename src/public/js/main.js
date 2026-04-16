@@ -1,4 +1,28 @@
 (function () {
+  // Cleanup for clients that still have an older PWA service worker after rollback.
+  async function clearLegacyServiceWorkerState() {
+    if (!('serviceWorker' in navigator)) return;
+
+    const cleanupKey = 'whale_legacy_sw_cleanup_v1';
+    if (window.localStorage && localStorage.getItem(cleanupKey) === 'done') return;
+
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+      }
+
+      if (window.localStorage) localStorage.setItem(cleanupKey, 'done');
+    } catch (_error) {
+      // Best effort cleanup only; ignore failures to avoid disrupting navigation.
+    }
+  }
+
+  clearLegacyServiceWorkerState();
+
   const hamburger = document.getElementById('hamburger');
   const navLinks = document.getElementById('navLinks');
   if (hamburger && navLinks) {

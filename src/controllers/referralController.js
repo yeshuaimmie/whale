@@ -2,6 +2,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const ReferralBonus = require('../models/ReferralBonus');
 const User = require('../models/User');
 const Investment = require('../models/Investment');
+const getAppUrl = require('../utils/getAppUrl');
 
 exports.getReferralPage = asyncHandler(async (req, res) => {
   const [bonuses, referrals, activeReferralUserIds] = await Promise.all([
@@ -13,7 +14,7 @@ exports.getReferralPage = asyncHandler(async (req, res) => {
   const totalBonus = bonuses.reduce((sum, item) => sum + item.amount, 0);
   const activeSet = new Set(activeReferralUserIds.map((id) => String(id)));
   const activeReferrals = referrals.filter((user) => activeSet.has(String(user._id)) || user.totalInvested > 0).length;
-  const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+  const appUrl = getAppUrl(req);
   const referralLink = `${appUrl}/register?ref=${encodeURIComponent(req.user.referralCode || '')}`;
 
   const referralRows = referrals.map((user) => {
