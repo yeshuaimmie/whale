@@ -23,7 +23,15 @@ exports.getWithdrawalPage = asyncHandler(async (req, res) => {
 
 exports.createWithdrawal = asyncHandler(async (req, res) => {
   const amount = Number(req.body.amount);
-  const freshUser = await User.findById(req.user._id).select('totalProfit accruedProfit referralEarnings');
+  const freshUser = await User.findById(req.user._id).select('totalProfit accruedProfit referralEarnings phone');
+
+  // Validate that the withdrawal phone matches the registered phone
+  const submittedPhone = (req.body.phone || '').trim();
+  const registeredPhone = (freshUser?.phone || '').trim();
+  if (submittedPhone !== registeredPhone) {
+    throw new ApiError(400, 'The mobile money number does not match your registered number. Withdrawals can only be made to the number registered on your account.');
+  }
+
   const totalProfit = Number(freshUser?.totalProfit || 0);
   const accruedProfit = Number(freshUser?.accruedProfit || 0);
   const referralEarnings = Number(freshUser?.referralEarnings || 0);

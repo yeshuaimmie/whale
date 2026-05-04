@@ -44,6 +44,15 @@
                     <label for="phone">Mobile Money Number</label>
                     <input type="tel" id="phone" name="phone" required placeholder="Enter your mobile money number (e.g., 0772123456)">
                     <small style="color: #666; font-size: 0.85rem;">MTN or Airtel number</small>
+                    <div style="background: linear-gradient(135deg, #fff3cd, #ffeaa7); border-left: 4px solid #f39c12; padding: 0.75rem 1rem; border-radius: 6px; margin-top: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                        <i class="fas fa-exclamation-triangle" style="color: #e67e22; margin-top: 2px; flex-shrink: 0;"></i>
+                        <small style="color: #856404; font-size: 0.82rem; line-height: 1.4;"><strong>Important:</strong> The withdrawal number must match the one registered on your account. This will be the <strong>only</strong> number you can use for withdrawals.</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPhone">Confirm Mobile Money Number</label>
+                    <input type="tel" id="confirmPhone" name="confirmPhone" required placeholder="Re-enter your mobile money number">
+                    <small id="phoneMatchStatus" style="font-size: 0.82rem;"></small>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
@@ -72,10 +81,54 @@
 
     <script src="/js/main.js"></script>
     <script>
+      // Live phone match indicator
+      (function() {
+        const phoneInput = document.getElementById('phone');
+        const confirmPhoneInput = document.getElementById('confirmPhone');
+        const phoneStatus = document.getElementById('phoneMatchStatus');
+
+        function checkPhoneMatch() {
+          const phone = phoneInput?.value?.trim();
+          const confirmPhone = confirmPhoneInput?.value?.trim();
+          if (!confirmPhone) {
+            phoneStatus.textContent = '';
+            confirmPhoneInput.style.borderColor = '';
+            return;
+          }
+          if (phone === confirmPhone) {
+            phoneStatus.textContent = '✓ Phone numbers match';
+            phoneStatus.style.color = '#27ae60';
+            confirmPhoneInput.style.borderColor = '#27ae60';
+          } else {
+            phoneStatus.textContent = '✗ Phone numbers do not match';
+            phoneStatus.style.color = '#e74c3c';
+            confirmPhoneInput.style.borderColor = '#e74c3c';
+          }
+        }
+        phoneInput?.addEventListener('input', checkPhoneMatch);
+        confirmPhoneInput?.addEventListener('input', checkPhoneMatch);
+      })();
+
       document.getElementById('registerForm')?.addEventListener('submit', function (e) {
+        const alertDiv = document.getElementById('alertMessage');
+
+        // Check phone match
+        const phone = document.getElementById('phone')?.value?.trim();
+        const confirmPhone = document.getElementById('confirmPhone')?.value?.trim();
+        if (phone !== confirmPhone) {
+          e.preventDefault();
+          if (alertDiv) {
+            alertDiv.style.display = 'block';
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.textContent = 'Mobile money numbers do not match. Please confirm your number.';
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return false;
+        }
+
+        // Check password match
         const password = document.getElementById('password')?.value;
         const confirmPassword = document.getElementById('confirmPassword')?.value;
-        const alertDiv = document.getElementById('alertMessage');
         if (password !== confirmPassword) {
           e.preventDefault();
           if (alertDiv) {
@@ -83,6 +136,7 @@
             alertDiv.className = 'alert alert-danger';
             alertDiv.textContent = 'Passwords do not match';
           }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           return false;
         }
       });
