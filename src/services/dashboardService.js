@@ -3,14 +3,16 @@ const Withdrawal = require('../models/Withdrawal');
 const Investment = require('../models/Investment');
 const ReferralBonus = require('../models/ReferralBonus');
 const InvestmentPlan = require('../models/InvestmentPlan');
+const User = require('../models/User');
 
 exports.getUserDashboardData = async (userId) => {
-  const [recentDeposits, recentWithdrawals, activeInvestments, allInvestments, referralBonuses, plans] = await Promise.all([
+  const [recentDeposits, recentWithdrawals, activeInvestments, allInvestments, referralBonuses, teamMembers, plans] = await Promise.all([
     Deposit.find({ user: userId }).sort({ createdAt: -1 }).limit(5),
     Withdrawal.find({ user: userId }).sort({ createdAt: -1 }).limit(5),
     Investment.find({ user: userId, status: 'active' }).populate('plan').sort({ createdAt: -1 }).limit(10),
     Investment.find({ user: userId }).populate('plan').sort({ createdAt: -1 }).limit(10),
     ReferralBonus.find({ referrer: userId }).sort({ createdAt: -1 }).limit(10).populate('referredUser', 'fullName email'),
+    User.find({ referredBy: userId }).select('fullName email createdAt totalInvested'),
     InvestmentPlan.find({ isActive: true }).sort({ minimumAmount: 1 }),
   ]);
 
@@ -48,6 +50,7 @@ exports.getUserDashboardData = async (userId) => {
     activeInvestments,
     allInvestments,
     referralBonuses,
+    teamMembers,
     plans,
     stats: {
       pendingDeposits,

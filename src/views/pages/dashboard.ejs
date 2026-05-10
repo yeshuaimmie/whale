@@ -16,6 +16,126 @@
                 <div class="stat-card"><div class="stat-info"><h3>Referral Earnings</h3><p style="font-size: clamp(1.2rem, 4vw, 1.8rem);"><%= totals.referralEarnings %></p></div><div class="stat-icon" style="background: #f3e5f5; color: #7b1fa2;"><i class="fas fa-users"></i></div></div>
             </div>
 
+            <% const teamMembers = Array.isArray(data.teamMembers) ? data.teamMembers : []; %>
+
+            <div class="card team-card">
+                <div class="card-header">
+                    <button type="button" class="team-toggle" id="teamToggle" aria-expanded="false" aria-controls="teamList">
+                        <div>
+                            <h3 style="margin-bottom: 0.35rem;">Team</h3>
+                            <p class="team-meta">People you referred: <%= teamMembers.length %></p>
+                        </div>
+                        <i class="fas fa-chevron-down" id="teamToggleIcon"></i>
+                    </button>
+                </div>
+                <div class="team-list" id="teamList">
+                    <% if (teamMembers.length) { %>
+                        <% teamMembers.forEach((member) => { %>
+                            <div class="team-item">
+                                <div class="team-person">
+                                    <span class="team-name"><%= member.fullName %></span>
+                                    <span class="team-email"><%= member.email %></span>
+                                    <span class="team-date">Joined <%= new Date(member.createdAt).toLocaleDateString() %></span>
+                                </div>
+                                <div class="team-amount">UGX <%= Number(member.totalInvested || 0).toLocaleString() %> invested</div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p style="color: #666; margin: 0;">You have not referred anyone yet.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <style>
+                .team-card {
+                    margin-top: 2rem;
+                }
+
+                .team-toggle {
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 1rem;
+                    background: transparent;
+                    border: 0;
+                    padding: 0;
+                    color: inherit;
+                    font: inherit;
+                    cursor: pointer;
+                    text-align: left;
+                }
+
+                .team-toggle:focus-visible {
+                    outline: 2px solid #1976d2;
+                    outline-offset: 4px;
+                    border-radius: 8px;
+                }
+
+                .team-meta {
+                    color: #666;
+                    font-size: 0.9rem;
+                    margin-top: 0.35rem;
+                }
+
+                .team-list {
+                    display: none;
+                    margin-top: 1rem;
+                    border-top: 1px solid rgba(0, 0, 0, 0.08);
+                    padding-top: 1rem;
+                }
+
+                .team-list.is-open {
+                    display: block;
+                }
+
+                .team-item {
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 1rem;
+                    padding: 0.85rem 0;
+                    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+                }
+
+                .team-item:last-child {
+                    border-bottom: 0;
+                    padding-bottom: 0;
+                }
+
+                .team-person {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.2rem;
+                }
+
+                .team-name {
+                    font-weight: 600;
+                    color: #1f2937;
+                }
+
+                .team-email,
+                .team-date {
+                    color: #6b7280;
+                    font-size: 0.88rem;
+                }
+
+                .team-amount {
+                    white-space: nowrap;
+                    font-weight: 600;
+                    color: #0f5132;
+                }
+
+                @media (max-width: 640px) {
+                    .team-item {
+                        flex-direction: column;
+                    }
+
+                    .team-amount {
+                        white-space: normal;
+                    }
+                }
+            </style>
+
             <style>
                 .investment-progress-card {
                     margin-bottom: 2rem;
@@ -271,6 +391,21 @@
         navigator.clipboard.writeText(input.value);
         alert('Referral link copied to clipboard!');
       }
+
+            (function initTeamToggle() {
+                const toggle = document.getElementById('teamToggle');
+                const list = document.getElementById('teamList');
+                const icon = document.getElementById('teamToggleIcon');
+
+                if (!toggle || !list || !icon) return;
+
+                toggle.addEventListener('click', function() {
+                    const isOpen = list.classList.toggle('is-open');
+                    toggle.setAttribute('aria-expanded', String(isOpen));
+                    icon.classList.toggle('fa-chevron-down', !isOpen);
+                    icon.classList.toggle('fa-chevron-up', isOpen);
+                });
+            })();
 
             function formatCountdown(ms) {
                 const totalSeconds = Math.max(0, Math.floor(ms / 1000));
